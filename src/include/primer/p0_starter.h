@@ -35,7 +35,11 @@ class Matrix {
    * @param cols The number of columns
    *
    */
-  Matrix(int rows, int cols) {}
+  Matrix(int rows, int cols) {
+    this->rows_ = rows;
+    this->cols_ = cols;
+    // linear_ = new T[rows];
+  }
 
   /** The number of rows in the matrix */
   int rows_;
@@ -112,19 +116,24 @@ class RowMatrix : public Matrix<T> {
    * @param rows The number of rows
    * @param cols The number of columns
    */
-  RowMatrix(int rows, int cols) : Matrix<T>(rows, cols) {}
+  RowMatrix(int rows, int cols) : Matrix<T>(rows, cols) {
+    data_ = new T *[rows];
+    for (int i = 0; i < rows; ++i) {
+      data_[i] = new T[cols];
+    }
+  }
 
   /**
    * TODO(P0): Add implementation
    * @return The number of rows in the matrix
    */
-  int GetRowCount() const override { return 0; }
+  int GetRowCount() const override { return this->rows_; }
 
   /**
    * TODO(P0): Add implementation
    * @return The number of columns in the matrix
    */
-  int GetColumnCount() const override { return 0; }
+  int GetColumnCount() const override { return this->cols_; }
 
   /**
    * TODO(P0): Add implementation
@@ -139,7 +148,10 @@ class RowMatrix : public Matrix<T> {
    * @throws OUT_OF_RANGE if either index is out of range
    */
   T GetElement(int i, int j) const override {
-    throw NotImplementedException{"RowMatrix::GetElement() not implemented."};
+    if (i < 0 || i > this->rows_ - 1 || j < 0 || j > this->cols_ - 1) {
+      throw new Exception(ExceptionType::OUT_OF_RANGE, "get out of range");
+    }
+    return data_[i][j];
   }
 
   /**
@@ -152,7 +164,12 @@ class RowMatrix : public Matrix<T> {
    * @param val The value to insert
    * @throws OUT_OF_RANGE if either index is out of range
    */
-  void SetElement(int i, int j, T val) override {}
+  void SetElement(int i, int j, T val) override {
+    if (i < 0 || i > this->rows_ - 1 || j < 0 || j > this->cols_ - 1) {
+      throw new Exception(ExceptionType::OUT_OF_RANGE, "set out of range");
+    }
+    data_[i][j] = val;
+  }
 
   /**
    * TODO(P0): Add implementation
@@ -166,7 +183,15 @@ class RowMatrix : public Matrix<T> {
    * @throws OUT_OF_RANGE if `source` is incorrect size
    */
   void FillFrom(const std::vector<T> &source) override {
-    throw NotImplementedException{"RowMatrix::FillFrom() not implemented."};
+    int len = source.size();
+    if (len > this->rows_ * this->cols_) {
+      throw new Exception(ExceptionType::OUT_OF_RANGE, "fill out of range");
+    }
+    for (int i = 0; i < len; ++i) {
+      int r = i / this->cols_;
+      int c = i - r * this->rows_;
+      data_[r][c] = source[i];
+    }
   }
 
   /**
@@ -174,7 +199,12 @@ class RowMatrix : public Matrix<T> {
    *
    * Destroy a RowMatrix instance.
    */
-  ~RowMatrix() override = default;
+  ~RowMatrix() override {
+    for (int i = 0; i < this->rows_; ++i) {
+      delete[] data_[i];
+    }
+    delete[] data_;
+  };
 
  private:
   /**
@@ -182,7 +212,8 @@ class RowMatrix : public Matrix<T> {
    *
    * TODO(P0):
    * - Allocate the array of row pointers in the constructor.
-   * - Use these pointers to point to corresponding elements of the `linear` array.
+   * - Use these pointers to point to corresponding elements of the `linear`
+   * array.
    * - Don't forget to deallocate the array in the destructor.
    */
   T **data_;
@@ -202,32 +233,36 @@ class RowMatrixOperations {
    * @param matrixB Input matrix
    * @return The result of matrix addition
    */
-  static std::unique_ptr<RowMatrix<T>> Add(const RowMatrix<T> *matrixA, const RowMatrix<T> *matrixB) {
+  static std::unique_ptr<RowMatrix<T>> Add(const RowMatrix<T> *matrixA,
+                                           const RowMatrix<T> *matrixB) {
     // TODO(P0): Add implementation
     return std::unique_ptr<RowMatrix<T>>(nullptr);
   }
 
   /**
-   * Compute the matrix multiplication (`matrixA` * `matrixB` and return the result.
-   * Return `nullptr` if dimensions mismatch for input matrices.
+   * Compute the matrix multiplication (`matrixA` * `matrixB` and return the
+   * result. Return `nullptr` if dimensions mismatch for input matrices.
    * @param matrixA Input matrix
    * @param matrixB Input matrix
    * @return The result of matrix multiplication
    */
-  static std::unique_ptr<RowMatrix<T>> Multiply(const RowMatrix<T> *matrixA, const RowMatrix<T> *matrixB) {
+  static std::unique_ptr<RowMatrix<T>> Multiply(const RowMatrix<T> *matrixA,
+                                                const RowMatrix<T> *matrixB) {
     // TODO(P0): Add implementation
     return std::unique_ptr<RowMatrix<T>>(nullptr);
   }
 
   /**
-   * Simplified General Matrix Multiply operation. Compute (`matrixA` * `matrixB` + `matrixC`).
-   * Return `nullptr` if dimensions mismatch for input matrices.
+   * Simplified General Matrix Multiply operation. Compute (`matrixA` *
+   * `matrixB` + `matrixC`). Return `nullptr` if dimensions mismatch for input
+   * matrices.
    * @param matrixA Input matrix
    * @param matrixB Input matrix
    * @param matrixC Input matrix
    * @return The result of general matrix multiply
    */
-  static std::unique_ptr<RowMatrix<T>> GEMM(const RowMatrix<T> *matrixA, const RowMatrix<T> *matrixB,
+  static std::unique_ptr<RowMatrix<T>> GEMM(const RowMatrix<T> *matrixA,
+                                            const RowMatrix<T> *matrixB,
                                             const RowMatrix<T> *matrixC) {
     // TODO(P0): Add implementation
     return std::unique_ptr<RowMatrix<T>>(nullptr);
